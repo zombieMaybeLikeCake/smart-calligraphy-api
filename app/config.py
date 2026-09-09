@@ -23,6 +23,19 @@ class Settings:
     # goalword 生成模式用到的字型（見未來 /synthesize 之類端點，目前 /predict 用不到）
     font_path: str = os.getenv("FONT_PATH", "fonts/BiauKai.ttf")
 
+    # 空字串＝不驗證（本機開發預設）。服務一旦掛上公網（見 README 的 frp 那節）
+    # 一定要設這個，不然任何人都能打 /predict/*。真正的 key 只從環境變數讀，
+    # 不進 git、不寫死在程式碼裡。
+    api_key: str = os.getenv("API_KEY", "")
+
+    # 每個來源 IP 對 /predict/* 的速率限制，slowapi 的字串格式（"10/minute" 等）。
+    # 注意：透過 frp tcp 模式轉發時，FastAPI 看到的來源 IP 是 frps 的位址，
+    # 不是真正的訪客，這會讓「每 IP」限流退化成「所有人共用同一個額度」。
+    # 要修正這個要嘛在 frpc 那條 proxy 開 transport.proxyProtocolVersion = "v2"
+    # 並在 uvicorn 加 --proxy-headers，要嘛接受這個限制、當作全域限流來看。
+    # 目前選後者（doesn't block，先求有再求精確），frp 設定之後想改再改。
+    rate_limit_predict: str = os.getenv("RATE_LIMIT_PREDICT", "10/minute")
+
     # /predict/word、/predict/stroke 是各自獨立的端點，服務啟動時兩個模型都要載入，
     # 不是二選一，所以這裡兩組設定同時存在，不是像階段一那樣用 MODEL_TASK 切換。
     #

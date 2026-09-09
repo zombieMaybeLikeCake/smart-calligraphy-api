@@ -8,6 +8,11 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       DEVICE: cuda
+      # 從主機環境變數 / .env 讀，不寫死在這個檔案裡（這個檔案會進 git）。
+      # 沒設就是空字串，等同 app/main.py 裡 api_key="" 的「不驗證」預設，
+      # 服務要掛公網之前務必先設好，見 README。
+      API_KEY: ${API_KEY:-}
+      RATE_LIMIT_PREDICT: ${RATE_LIMIT_PREDICT:-10/minute}
     deploy:
       resources:
         reservations:

@@ -16,5 +16,8 @@ models/checkpoint_stroke/*.pth
 # frp 設定含 token，不進 git（若之後把 frp 相關檔案放進這個 repo）
 frpc.toml
 frp/frpc.toml
+
+# 真正的 API Key 放這裡，不進 git；.env.example 才是要 commit 的範本
+.env
 scripts/smoke_test_output*.png
 scripts/smoke_stroke_*.png

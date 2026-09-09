@@ -3,8 +3,12 @@ import time
 from contextlib import asynccontextmanager
 from typing import Dict
 
-from fastapi import FastAPI, File, HTTPException, Query, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, UploadFile
 from PIL import Image, UnidentifiedImageError
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 
 from app import inference
 from app.config import settings
@@ -12,6 +16,8 @@ from app.schemas import HealthResponse, ModelStatus, StrokeResult
 
 ALLOWED_TYPES = {"image/jpeg", "image/png"}
 MAX_SIZE = 5 * 1024 * 1024  # 5 MB
+
+limiter = Limiter(key_func=get_remote_address)
 
 # word/stroke 是各自獨立的端點，不是同一個模型的參數切換，服務啟動時
 # 兩個都要載入常駐。用 dict 存兩個 ModelHandle，不是模組層級單一變數
@@ -48,6 +54,18 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+
+def verify_api_key(x_api_key: str = Header(None)):
+    """套用在 /predict/* 上，不套在 /health、/docs——服務公開後這兩個
+    還是要讓面試官不用金鑰就看得到。settings.api_key 空字串＝不驗證，
+    這是本機開發預設；一旦要掛公網，環境變數沒設 API_KEY 就等於忘記關門，
+    這點只能自己記得設，程式碼這邊沒辦法幫忙擋。"""
+    if settings.api_key and x_api_key != settings.api_key:
+        raise HTTPException(401, "無效或缺少的 API Key（X-API-Key 標頭）")
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -104,8 +122,12 @@ def _run_predict(
     return StrokeResult(**result, inference_ms=round(elapsed, 2))
 
 
-@app.post("/predict/word", response_model=StrokeResult)
+@app.post(
+    "/predict/word", response_model=StrokeResult, dependencies=[Depends(verify_api_key)]
+)
+@limiter.limit(settings.rate_limit_predict)
 async def predict_word(
+    request: Request,
     file: UploadFile = File(...),
     label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
     red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
@@ -118,8 +140,12 @@ async def predict_word(
     return _run_predict("word", image, label, red, green, blue, alph)
 
 
-@app.post("/predict/stroke", response_model=StrokeResult)
+@app.post(
+    "/predict/stroke", response_model=StrokeResult, dependencies=[Depends(verify_api_key)]
+)
+@limiter.limit(settings.rate_limit_predict)
 async def predict_stroke(
+    request: Request,
     file: UploadFile = File(...),
     label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
     red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
