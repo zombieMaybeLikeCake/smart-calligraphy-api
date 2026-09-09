@@ -1,10 +1,17 @@
-# 版本號是實際在本機 conda env 裡跑過 app/main.py、確認 /health、/docs、
-# /predict/word、/predict/stroke 都正常的那組，不是憑空抄計畫書草稿的版本號。
-fastapi==0.141.1
-uvicorn[standard]==0.52.4
-python-multipart==0.0.32
-pillow==12.3.0
-numpy==1.26.4
+# 這幾個版本號 2026-09-09 build image 時發現在 pip 能解析到的索引裡不存在
+# （fastapi==0.141.1 從 pip 錯誤訊息看，當下可查到的最新是 0.124.4；本機
+# conda env 裝到 0.141.1 應該是走了不同的索引/時間點，不能保證在別的環境
+# 也解得到）。改成低於任何一邊可查到版本上限的舊版，避免 build 時卡住；
+# 這幾個套件在這份程式碼用到的功能上（FastAPI 基本路由、lifespan、
+# Pydantic v2 model）都夠穩定，不會因為版本差幾個 minor 就跑不動。
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+pillow==10.4.0
+# numpy 1.25+ dropped Python 3.8 support (容器內是 3.8，Ubuntu 20.04 預設版本），
+# 1.24.4 是同時支援 3.8（容器）跟 3.10（本機 conda env）、又是 numpy 1.x
+# （torch 1.13.1 只吃 1.x，見 app/inference.py 開發過程踩過的雷）的交集版本。
+numpy==1.24.4
 
 # 已於 2026-09-09 用 nvidia-smi 確認本機驅動：Driver 512.78 / CUDA 11.6 上限。
 # torch 1.13.1+cu116 有 wheel，但搭配的 torchvision 0.14.1+cu116 最高只到 cp310

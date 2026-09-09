@@ -14,6 +14,7 @@ repo 的 model/model.py 裡並不存在（只有 sample()，是另一個東西�
 import base64
 from dataclasses import dataclass
 from io import BytesIO
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -67,7 +68,7 @@ def load_model(
     return ModelHandle(model=model, device=device, version=version)
 
 
-def fitbest(image: Image.Image) -> tuple[Image.Image, dict]:
+def fitbest(image: Image.Image) -> Tuple[Image.Image, dict]:
     """從原圖裡找出筆劃的邊界框，裁切後置中貼進一個正方形畫布。
 
     回傳 (正方形畫布圖, 座標中繼資料)。中繼資料是把生成結果對應回原圖
@@ -113,7 +114,7 @@ def fitbest(image: Image.Image) -> tuple[Image.Image, dict]:
     return canvas, meta
 
 
-def _tint_strokes(image: Image.Image, color: tuple[int, int, int, int]) -> Image.Image:
+def _tint_strokes(image: Image.Image, color: Tuple[int, int, int, int]) -> Image.Image:
     """白色背景去背成透明、深色筆劃塗成指定顏色，中間的反鋸齒邊緣像素原樣保留。
 
     向量化版本的 singalereduction()（拿掉了原本函式裡兩個沒有實際作用的
@@ -140,7 +141,7 @@ def _image_to_base64(image: Image.Image) -> str:
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
 
-def preprocess(image: Image.Image) -> tuple[torch.Tensor, dict]:
+def preprocess(image: Image.Image) -> Tuple[torch.Tensor, dict]:
     """圖片 → 模型輸入 tensor，同時回傳定位用的中繼資料。"""
     canvas, meta = fitbest(image)
     canvas = canvas.resize((CANVAS_SIZE, CANVAS_SIZE))
@@ -152,7 +153,7 @@ def predict(
     handle: ModelHandle,
     image: Image.Image,
     label: int = 0,
-    stroke_color: tuple[int, int, int, int] = (0, 0, 0, 255),
+    stroke_color: Tuple[int, int, int, int] = (0, 0, 0, 255),
 ) -> dict:
     """單張圖片推論，回傳可直接 JSON 序列化的 dict。
 

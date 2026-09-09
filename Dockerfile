@@ -28,19 +28,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=builder /install /usr/local
 
-COPY app/ ./app/
-COPY model/ ./model/
-COPY utils/ ./utils/
-COPY fonts/ ./fonts/
-COPY models/ ./models/
+# 非 root 執行：先建帳號，COPY 時直接用 --chown 落地為 appuser 所有，
+# 不要「COPY 完再 chown -R」——對已經有 ~500MB checkpoint/套件的目錄做
+# chown -R 會把整個目錄的內容重寫進新的一層，實測讓 image 白白多 495MB。
+RUN useradd -m appuser
+
+COPY --chown=appuser:appuser app/ ./app/
+COPY --chown=appuser:appuser model/ ./model/
+COPY --chown=appuser:appuser utils/ ./utils/
+COPY --chown=appuser:appuser fonts/ ./fonts/
+COPY --chown=appuser:appuser models/ ./models/
 
 ENV DEVICE=cuda \
     PYTHONUNBUFFERED=1 \
     NVIDIA_VISIBLE_DEVICES=all \
-    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+    # pip（在 builder 階段用 --prefix=/install 裝）把套件放進
+    # .../site-packages，但 Debian/Ubuntu 系統 Python 只認自己 patch 過的
+    # .../dist-packages，預設 sys.path 找不到 site-packages，實測會直接
+    # ModuleNotFoundError（先前 build 撞過：/usr/local/bin/python: No
+    # module named uvicorn）。明講 PYTHONPATH 是最直接、最不會被下一次
+    # 改動悄悄弄壞的修法。
+    PYTHONPATH=/usr/local/lib/python3.8/site-packages
 
-# 非 root 執行
-RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000

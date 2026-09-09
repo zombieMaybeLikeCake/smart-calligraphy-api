@@ -1,6 +1,7 @@
 import io
 import time
 from contextlib import asynccontextmanager
+from typing import Dict
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from PIL import Image, UnidentifiedImageError
@@ -15,7 +16,7 @@ MAX_SIZE = 5 * 1024 * 1024  # 5 MB
 # word/stroke 是各自獨立的端點，不是同一個模型的參數切換，服務啟動時
 # 兩個都要載入常駐。用 dict 存兩個 ModelHandle，不是模組層級單一變數
 # ——這就是階段一把 inference.py 從全域單例改成 ModelHandle 的原因。
-_handles: dict[str, inference.ModelHandle] = {}
+_handles: Dict[str, inference.ModelHandle] = {}
 
 
 @asynccontextmanager

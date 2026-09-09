@@ -1,3 +1,5 @@
+from typing import Dict
+
 from pydantic import BaseModel
 
 
@@ -23,4 +25,4 @@ class ModelStatus(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
-    models: dict[str, ModelStatus]
+    models: Dict[str, ModelStatus]
