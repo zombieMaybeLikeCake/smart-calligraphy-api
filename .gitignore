@@ -10,7 +10,7 @@ data/
 
 # 模型權重不進 git：6000_net_G.pth 約 221MB，超過 GitHub 單檔 100MB 硬限制，
 # push 會直接被拒絕。改用 Git LFS 或外部下載連結（README 註明）發布權重。
-models/checkpoint/*.pth
+models/checkpoint_word/*.pth
 models/checkpoint_stroke/*.pth
 
 # frp 設定含 token，不進 git（若之後把 frp 相關檔案放進這個 repo）

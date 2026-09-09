@@ -31,7 +31,7 @@ def main() -> None:
     print(f"torch device 期望: cuda（GPU 不可用會自動降級，見下方 warning）")
     t0 = time.perf_counter()
     inference.load_model(
-        model_dir=str(ROOT / "models" / "checkpoint"),
+        model_dir=str(ROOT / "models" / "checkpoint_word"),
         epoch=6000,
         device="cuda",
     )
