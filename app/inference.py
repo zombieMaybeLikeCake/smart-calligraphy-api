@@ -6,8 +6,13 @@ repo 的 model/model.py 裡並不存在（只有 sample()，是另一個東西�
 會直接 AttributeError。這裡改成直接用 model.set_input() + model.forward()
 跑推論、在記憶體裡把輸出 tensor 轉成圖片，不寫檔案到磁碟——這樣服務才是
 無狀態的，也才符合「純函式」的要求。
+
+裝載的模型用 ModelHandle 包起來當回傳值，不用模組層級的全域變數存單一個
+模型實例——階段二要同時常駐 word/stroke 兩個模型、各自綁一個 FastAPI 端點，
+全域單例裝不下兩個。
 """
 import base64
+from dataclasses import dataclass
 from io import BytesIO
 
 import numpy as np
@@ -19,8 +24,15 @@ from model import Zi2ZiModel
 
 CANVAS_SIZE = 256
 
-_model: Zi2ZiModel | None = None
-active_device: str | None = None  # 實際生效的裝置，供 /health 回報
+
+@dataclass
+class ModelHandle:
+    """load_model() 的回傳值，把模型實例跟它實際跑在哪個裝置綁在一起。
+    predict() 認的是這個 handle，不是任何全域狀態。"""
+
+    model: Zi2ZiModel
+    device: str
+    version: str
 
 
 def load_model(
@@ -29,13 +41,12 @@ def load_model(
     device: str = "cuda",
     embedding_num: int = 40,
     embedding_dim: int = 128,
-) -> Zi2ZiModel:
-    """服務啟動時呼叫一次。model_dir 底下要有 f"{epoch}_net_G.pth" 和
+    version: str = "",
+) -> ModelHandle:
+    """服務啟動時對每個模型呼叫一次。model_dir 底下要有 f"{epoch}_net_G.pth" 和
     f"{epoch}_net_D.pth"（Zi2ziModel.load_networks 的命名規則）。"""
-    global _model, active_device
-
     if device == "cuda" and not torch.cuda.is_available():
-        print("[WARN] DEVICE=cuda 但找不到可用 GPU，自動降級為 CPU")
+        print(f"[WARN] DEVICE=cuda 但找不到可用 GPU，{model_dir} 自動降級為 CPU")
         device = "cpu"
 
     gpu_ids = ["cuda:0"] if device == "cuda" else None
@@ -53,9 +64,7 @@ def load_model(
     model.setup()
     model.load_networks(epoch)
 
-    _model = model
-    active_device = device
-    return _model
+    return ModelHandle(model=model, device=device, version=version)
 
 
 def fitbest(image: Image.Image) -> tuple[Image.Image, dict]:
@@ -140,6 +149,7 @@ def preprocess(image: Image.Image) -> tuple[torch.Tensor, dict]:
 
 
 def predict(
+    handle: ModelHandle,
     image: Image.Image,
     label: int = 0,
     stroke_color: tuple[int, int, int, int] = (0, 0, 0, 255),
@@ -150,16 +160,13 @@ def predict(
     上色/去背過的筆劃圖片＋在原圖座標系裡的位置資訊，對應 iOS App 端
     需要的 stroke overlay 格式。
     """
-    if _model is None:
-        raise RuntimeError("模型尚未載入")
-
     tensor, meta = preprocess(image)
     label_tensor = torch.tensor([label])
 
     with torch.no_grad():
-        _model.set_input(label_tensor, tensor, tensor)
-        _model.forward()
-        fake_b = _model.fake_B[0].detach().cpu()
+        handle.model.set_input(label_tensor, tensor, tensor)
+        handle.model.forward()
+        fake_b = handle.model.fake_B[0].detach().cpu()
 
     # UNetGenerator 最後一層是 Tanh，輸出範圍是 [-1, 1]，
     # 要先還原成 [0, 1] 才能轉成正常的圖片像素值。
