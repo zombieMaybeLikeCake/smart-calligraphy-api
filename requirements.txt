@@ -1,0 +1,12 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+pillow==10.4.0
+numpy==1.26.4
+
+# 已於 2026-09-09 用 nvidia-smi 確認本機驅動：Driver 512.78 / CUDA 11.6 上限。
+# torch 1.13.1 是還有 +cu116 wheel 的最後一個版本，且只到 Python 3.10/3.11 的 build，
+# 本機開發要用 conda env `smart-calligraphy-api`（Python 3.11），不要用系統預設 python。
+--extra-index-url https://download.pytorch.org/whl/cu116
+torch==1.13.1+cu116
+torchvision==0.14.1+cu116
