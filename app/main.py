@@ -1,7 +1,7 @@
 import io
 import time
 from contextlib import asynccontextmanager
-from typing import Dict
+from typing import Dict, List
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,10 +14,13 @@ from slowapi.util import get_remote_address
 
 from app import inference
 from app.config import settings
-from app.schemas import HealthResponse, ModelStatus, StrokeResult
+from app.schemas import HealthResponse, ModelStatus, StrokeResult, SynthesizeCharResult
 
 ALLOWED_TYPES = {"image/jpeg", "image/png"}
 MAX_SIZE = 5 * 1024 * 1024  # 5 MB
+# /synthesize/* 每個字都各跑一次推論，不能讓一次請求塞一長串文字就把
+# GPU 佔滿、變相繞過速率限制。20 字對展示用途綽綽有餘。
+MAX_SYNTHESIZE_CHARS = 20
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -175,3 +178,81 @@ async def predict_stroke(
     app/config.py 裡的說明，回應格式跟 /predict/word 完全一樣。"""
     image = await _decode_upload(file)
     return _run_predict("stroke", image, label, red, green, blue, alph)
+
+
+def _run_synthesize(
+    task: str,
+    text: str,
+    label: int,
+    red: int,
+    green: int,
+    blue: int,
+    alph: int,
+) -> List[SynthesizeCharResult]:
+    if len(text) > MAX_SYNTHESIZE_CHARS:
+        raise HTTPException(400, f"最多一次 {MAX_SYNTHESIZE_CHARS} 個字，收到 {len(text)} 個")
+
+    handle = _handles.get(task)
+    if handle is None:
+        raise HTTPException(503, f"{task} 模型尚未載入")
+
+    if not 0 <= label < settings.embedding_num:
+        raise HTTPException(400, f"label 必須介於 0 ~ {settings.embedding_num - 1}")
+
+    results: List[SynthesizeCharResult] = []
+    for ch in text:
+        start = time.perf_counter()
+        try:
+            image = inference.render_char(ch, settings.font_path)
+            result = inference.predict(
+                handle, image, label=label, stroke_color=(red, green, blue, alph)
+            )
+        except ValueError as exc:
+            # fitbest() 在字型畫出來的圖裡偵測不到筆劃時丟這個
+            # （理論上不會發生——字型渲染一定有墨色——但空白字元之類的
+            # 邊界情況還是可能觸發，當成使用者輸入問題回 400）
+            raise HTTPException(400, f"「{ch}」：{exc}")
+        elapsed = (time.perf_counter() - start) * 1000
+        results.append(SynthesizeCharResult(char=ch, **result, inference_ms=round(elapsed, 2)))
+
+    return results
+
+
+@app.post(
+    "/synthesize/word",
+    response_model=List[SynthesizeCharResult],
+    dependencies=[Depends(verify_api_key)],
+)
+@limiter.limit(settings.rate_limit_synthesize)
+async def synthesize_word(
+    request: Request,
+    text: str = Query(..., min_length=1, max_length=MAX_SYNTHESIZE_CHARS, description="要生成的文字"),
+    label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
+    red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
+    green: int = Query(0, ge=0, le=255, description="筆劃上色的 G"),
+    blue: int = Query(0, ge=0, le=255, description="筆劃上色的 B"),
+    alph: int = Query(255, ge=0, le=255, description="筆劃上色的 Alpha"),
+):
+    """打字生成整字風格轉換：不用上傳圖片，文字先用字型（見
+    app/config.py 的 font_path）畫成圖，再送進模型。逐字推論，回傳陣列，
+    順序對應輸入文字。"""
+    return _run_synthesize("word", text, label, red, green, blue, alph)
+
+
+@app.post(
+    "/synthesize/stroke",
+    response_model=List[SynthesizeCharResult],
+    dependencies=[Depends(verify_api_key)],
+)
+@limiter.limit(settings.rate_limit_synthesize)
+async def synthesize_stroke(
+    request: Request,
+    text: str = Query(..., min_length=1, max_length=MAX_SYNTHESIZE_CHARS, description="要生成的文字"),
+    label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
+    red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
+    green: int = Query(0, ge=0, le=255, description="筆劃上色的 G"),
+    blue: int = Query(0, ge=0, le=255, description="筆劃上色的 B"),
+    alph: int = Query(255, ge=0, le=255, description="筆劃上色的 Alpha"),
+):
+    """打字生成單一筆劃風格轉換，其餘同 /synthesize/word。"""
+    return _run_synthesize("stroke", text, label, red, green, blue, alph)

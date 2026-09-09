@@ -13,6 +13,7 @@ services:
       # 服務要掛公網之前務必先設好，見 README。
       API_KEY: ${API_KEY:-}
       RATE_LIMIT_PREDICT: ${RATE_LIMIT_PREDICT:-10/minute}
+      RATE_LIMIT_SYNTHESIZE: ${RATE_LIMIT_SYNTHESIZE:-5/minute}
     deploy:
       resources:
         reservations:

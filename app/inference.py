@@ -19,11 +19,15 @@ from typing import Tuple
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 from model import Zi2ZiModel
 
 CANVAS_SIZE = 256
+# 原本 strokeStytleChangeServerV2.py 的 draw_single_char() 用 font size 256
+# （跟 canvas 一樣大，字常常頂到邊）；這裡沿用 smoke_test.py 已經驗證過
+# 能穩定產生清楚結果的比例（256 的 78% 左右），不是隨便選的數字。
+_FONT_SIZE = 200
 
 
 @dataclass
@@ -66,6 +70,20 @@ def load_model(
     model.load_networks(epoch)
 
     return ModelHandle(model=model, device=device, version=version)
+
+
+def render_char(ch: str, font_path: str) -> Image.Image:
+    """把一個字用字型畫成圖片，取代「使用者上傳照片」這一步，供
+    /synthesize/* 用——對應原本 strokeStytleChangeServerV2.py 的
+    draw_single_char()。輸出直接是 fitbest() 能吃的白底黑字灰階圖，
+    不需要額外處理。"""
+    if len(ch) != 1:
+        raise ValueError("render_char 一次只畫一個字")
+    font = ImageFont.truetype(font_path, size=_FONT_SIZE)
+    img = Image.new("RGB", (CANVAS_SIZE, CANVAS_SIZE), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    draw.text((0, 0), ch, (0, 0, 0), font=font)
+    return img.convert("L")
 
 
 def fitbest(image: Image.Image) -> Tuple[Image.Image, dict]:

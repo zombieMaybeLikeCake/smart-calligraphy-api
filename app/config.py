@@ -20,7 +20,7 @@ class Settings:
     embedding_num: int = int(os.getenv("EMBEDDING_NUM", "40"))
     embedding_dim: int = int(os.getenv("EMBEDDING_DIM", "128"))
 
-    # goalword 生成模式用到的字型（見未來 /synthesize 之類端點，目前 /predict 用不到）
+    # /synthesize/* 用來把打的字轉成圖片的字型，/predict/* 用不到。
     font_path: str = os.getenv("FONT_PATH", "fonts/BiauKai.ttf")
 
     # 空字串＝不驗證（本機開發預設）。服務一旦掛上公網（見 README 的 frp 那節）
@@ -35,6 +35,11 @@ class Settings:
     # 並在 uvicorn 加 --proxy-headers，要嘛接受這個限制、當作全域限流來看。
     # 目前選後者（doesn't block，先求有再求精確），frp 設定之後想改再改。
     rate_limit_predict: str = os.getenv("RATE_LIMIT_PREDICT", "10/minute")
+
+    # /synthesize/* 一次請求可能對每個字各跑一次推論（見 main.py 的
+    # MAX_SYNTHESIZE_CHARS），比 /predict/* 單張圖片重得多，所以限制設得更緊，
+    # 不然一次打長字串就能繞過 /predict/* 那組限流的用意。
+    rate_limit_synthesize: str = os.getenv("RATE_LIMIT_SYNTHESIZE", "5/minute")
 
     # /predict/word、/predict/stroke 是各自獨立的端點，服務啟動時兩個模型都要載入，
     # 不是二選一，所以這裡兩組設定同時存在，不是像階段一那樣用 MODEL_TASK 切換。

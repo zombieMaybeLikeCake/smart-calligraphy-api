@@ -39,3 +39,19 @@ def test_predict_requires_api_key(client, monkeypatch):
     # ——驗證這個順序本身就是在測 dependencies=[Depends(verify_api_key)]
     # 真的比 UploadFile 的 body 解析先執行。
     assert r.status_code == 401
+
+
+def test_synthesize_word_returns_one_result_per_char(client):
+    r = client.post("/synthesize/word", params={"text": "永和"})
+    assert r.status_code == 200
+    body = r.json()
+    assert [item["char"] for item in body] == ["永", "和"]
+    assert all("image_base64" in item for item in body)
+
+
+def test_synthesize_rejects_too_many_chars(client):
+    r = client.post("/synthesize/word", params={"text": "永" * 21})
+    # FastAPI 的 Query(max_length=...) 在碰到模型之前就先擋下來，回 422
+    # 不是我們自己的 HTTPException(400,...)——這條測試就是在確認這個限制
+    # 真的接在路由上，不是只寫在 _run_synthesize 裡形同虛設。
+    assert r.status_code == 422

@@ -17,6 +17,14 @@ class StrokeResult(BaseModel):
     inference_ms: float
 
 
+class SynthesizeCharResult(StrokeResult):
+    """/synthesize/* 的其中一個字。多繼承 StrokeResult 的欄位，只多一個
+    char 標明這是輸入文字裡的哪一個字——回應是陣列，沒有這個欄位會對不上
+    順序（尤其如果之後想支援重複字元）。"""
+
+    char: str
+
+
 class ModelStatus(BaseModel):
     loaded: bool
     device: str

@@ -57,10 +57,13 @@ docker compose -f docker-compose.yml -f docker-compose.cpu.yml up
 |---|---|---|---|
 | GET | `/health` | 服務與模型載入狀態 | 否 |
 | GET | `/docs` | 互動式 API 文件（Swagger UI） | 否 |
+| GET | `/demo/` | 網頁畫布 demo | 否（畫布送出時內建 key） |
 | POST | `/predict/word` | 上傳整字圖片，取得風格轉換結果 | 是 |
 | POST | `/predict/stroke` | 上傳單一筆劃圖片，取得風格轉換結果 | 是 |
+| POST | `/synthesize/word` | 打字生成整字（不用上傳圖片，文字用字型畫成圖再送進模型） | 是 |
+| POST | `/synthesize/stroke` | 打字生成單一筆劃 | 是 |
 
-`/predict/*` 回傳的不是分類標籤，是一張重新上色/去背過的筆劃 PNG（base64）加上它在原圖座標系裡的位置——這個模型做的是圖生圖風格轉換，不是分類。
+`/predict/*`、`/synthesize/*` 回傳的都不是分類標籤，是一張重新上色/去背過的筆劃 PNG（base64）加上它在原圖座標系裡的位置——這個模型做的是圖生圖風格轉換，不是分類。
 
 ```bash
 curl -X POST "http://localhost:8000/predict/word?label=0" \
@@ -81,7 +84,23 @@ curl -X POST "http://localhost:8000/predict/word?label=0" \
 }
 ```
 
-錯誤情況：檔案不是 `image/jpeg`/`image/png` → 400；超過 5MB → 413；圖片裡偵測不到筆劃 → 400；沒帶或帶錯 `X-API-Key` → 401；超過速率限制 → 429。
+`/synthesize/*` 不用上傳檔案，直接打字，`text` 可以是多個字（上限見 `app/main.py` 的 `MAX_SYNTHESIZE_CHARS`，目前 20），逐字推論、回傳陣列，順序對應輸入文字：
+
+```bash
+curl -X POST "http://localhost:8000/synthesize/word?text=永和&label=0" \
+  -H "X-API-Key: <your-api-key>"
+```
+
+回應（陣列，每個元素多一個 `char` 欄位標明是哪個字）：
+
+```json
+[
+  { "char": "永", "x_position": 105.5, "y_position": 104.0, "width": 173, "height": 173, "image_base64": "...", "inference_ms": 141.7 },
+  { "char": "和", "x_position": 95.0,  "y_position": 105.5, "width": 172, "height": 172, "image_base64": "...", "inference_ms": 91.2 }
+]
+```
+
+錯誤情況：檔案不是 `image/jpeg`/`image/png` → 400；超過 5MB → 413；圖片/字型渲染出來的圖裡偵測不到筆劃 → 400；`text` 超過字數上限 → 422；沒帶或帶錯 `X-API-Key` → 401；超過速率限制 → 429。
 
 ## 架構
 
