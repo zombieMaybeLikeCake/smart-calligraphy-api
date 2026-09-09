@@ -38,6 +38,7 @@ COPY --chown=appuser:appuser model/ ./model/
 COPY --chown=appuser:appuser utils/ ./utils/
 COPY --chown=appuser:appuser fonts/ ./fonts/
 COPY --chown=appuser:appuser models/ ./models/
+COPY --chown=appuser:appuser web/ ./web/
 
 ENV DEVICE=cuda \
     PYTHONUNBUFFERED=1 \

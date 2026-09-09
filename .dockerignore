@@ -13,6 +13,5 @@ data/
 README.md
 docs/
 tests/
-web/
 scripts/smoke_test_output*.png
 scripts/smoke_stroke_*.png

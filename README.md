@@ -6,6 +6,7 @@
 
 不用 clone、不用裝 Docker，直接測：
 
+- **`/demo/`**：http://136.67.17.108:8080/demo/ —— 用滑鼠/觸控/手寫筆現場畫一筆，直接看生成結果，不用打 curl、不用裝任何東西
 - **`/docs`**：http://136.67.17.108:8080/docs
 - **展示用 API Key**（唯讀展示，每個來源 IP 限 10 次/分鐘，額度用完等一分鐘或直接看下面的截圖/自己 clone 跑）：
   ```
@@ -19,7 +20,9 @@
 
 服務跑在我自己的 GPU 主機上，透過 [frp](https://github.com/fatedier/frp) 從無公網 IP 的內網環境對外提供（見下方「架構」）。這組 key 是展示用的，會不定期輪替；`/health`、`/docs` 完全不需要 key。
 
-**用滑鼠/觸控/手寫筆直接畫、不用打 curl**：`web/index.html` 是個單一自包含的網頁 demo（純 HTML/CSS/JS，沒有建置流程），對 `/predict/stroke` 現場畫一筆送出、右邊顯示生成結果。本機開一個靜態伺服器就能用：
+**網頁畫布 demo**：`web/index.html` 是單一自包含的網頁（純 HTML/CSS/JS，沒有建置流程），對 `/predict/stroke` 現場畫一筆送出、右邊顯示生成結果。`app/main.py` 用 `StaticFiles` 把它直接掛在 `/demo/` 底下，跟著 API 一起部署，不用另外開伺服器——上面 Live Demo 的連結點了就是這個。
+
+想在容器外單獨改這個檔案、不想每次都重建 image 才能看到效果，可以本機開個靜態伺服器（這時候 `web/index.html` 裡的 `API_BASE` 常數要暫時改回完整網址，因為不再是跟 API 同源）：
 
 ```bash
 cd web && python -m http.server 8765

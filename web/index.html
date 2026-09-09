@@ -38,9 +38,12 @@
 </div>
 
 <script>
-// 對應 smart-calligraphy-api 的 /predict/stroke，跟 README 的 Live Demo 用同一組
-// 展示用 key（會不定期輪替，見 ../README.md）。
-const API_BASE = "http://136.67.17.108:8080";
+// 這個頁面是被 FastAPI 自己掛在 /demo 底下served 出來的（見 app/main.py 的
+// StaticFiles mount），跟 API 同源，所以留空走相對路徑就好，不用寫死 IP——
+// 本機 docker compose 起的是 :8000、透過 frp 對外是 :8080，同一份檔案兩邊
+// 都對。想在容器外單獨測（例如 python -m http.server）才需要把這裡改回
+// 完整網址。
+const API_BASE = "";
 const API_KEY = "jupd7_Nu3LEj3qJQhJNMt0TzkRHVU10ka4jDss862Js";
 // 跟後端 app/inference.py 的 CANVAS_SIZE 對齊——送出前一律縮成這個尺寸，
 // 不管畫布在螢幕上實際畫多大，避免不同瀏覽器/裝置解析度餵進模型的圖不一致。

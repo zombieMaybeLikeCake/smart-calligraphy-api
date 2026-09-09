@@ -5,6 +5,7 @@ from typing import Dict
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -59,17 +60,21 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-# 網頁版 demo（web/index.html）是從瀏覽器直接打這個 API，跟 API 不同 origin
-# ——沒有 CORS 的話瀏覽器會直接擋掉回應，不會出現在 /docs 那種測試裡，只有
-# 真的從網頁 fetch() 才會踩到。allow_origins 開 "*" 是刻意的：這支 API 本來
-# 就公開、有 API Key 擋（見 verify_api_key），CORS 只決定「瀏覽器要不要讓
-# 網頁看到回應」，不是額外的存取控制層，收緊它不會讓 API 更安全。
+# /demo（下面掛的 StaticFiles）現在跟 API 同源，這個 middleware 本身對它
+# 已經不是必要的了，但留著是因為 API 本來就設計成可以被別的網頁/App 打
+# （這正是 /predict/* 需要 API Key 而不是靠同源限制擋人的原因），拿掉反而
+# 是縮小了服務的用途。allow_origins 開 "*" 是刻意的：CORS 只決定「瀏覽器
+# 要不要讓網頁看到回應」，不是存取控制層，收緊它不會讓 API 更安全。
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+# 網頁版 demo：web/index.html 掛在 /demo/ 底下，跟 /predict/* 同一個 process、
+# 同一個 origin，不用另外開靜態伺服器。html=True 讓 /demo/ 直接回 index.html。
+app.mount("/demo", StaticFiles(directory="web", html=True), name="demo")
 
 
 def verify_api_key(x_api_key: str = Header(None)):
