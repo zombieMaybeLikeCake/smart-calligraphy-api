@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calligraphy Stroke Demo</title>
+<style>
+  body { font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f5f5f5; margin: 0; padding: 24px; }
+  h1 { font-size: 18px; margin: 0 0 16px; }
+  .app { display: flex; gap: 24px; flex-wrap: wrap; }
+  .panel { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+  #canvas { border: 1px solid #999; border-radius: 4px; touch-action: none; cursor: crosshair; display: block; }
+  .buttons { margin-top: 12px; display: flex; gap: 8px; }
+  button { padding: 8px 16px; font-size: 14px; border: 1px solid #999; border-radius: 4px; background: #fff; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  #submitBtn { background: #222; color: #fff; border-color: #222; }
+  .result { width: 300px; }
+  #resultImg { width: 268px; height: 268px; border: 1px dashed #ccc; border-radius: 4px; background: #fafafa;
+               display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; }
+  #resultImg img { max-width: 100%; max-height: 100%; }
+  #status { margin-top: 12px; font-size: 13px; color: #666; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>Smart Calligraphy — 筆劃風格轉換 Demo</h1>
+<div class="app">
+  <div class="panel">
+    <canvas id="canvas" width="320" height="320"></canvas>
+    <div class="buttons">
+      <button id="clearBtn">清除</button>
+      <button id="submitBtn">送出</button>
+    </div>
+  </div>
+  <div class="panel result">
+    <div id="resultImg">尚無結果</div>
+    <div id="status"></div>
+  </div>
+</div>
+
+<script>
+// 對應 smart-calligraphy-api 的 /predict/stroke，跟 README 的 Live Demo 用同一組
+// 展示用 key（會不定期輪替，見 ../README.md）。
+const API_BASE = "http://136.67.17.108:8080";
+const API_KEY = "jupd7_Nu3LEj3qJQhJNMt0TzkRHVU10ka4jDss862Js";
+// 跟後端 app/inference.py 的 CANVAS_SIZE 對齊——送出前一律縮成這個尺寸，
+// 不管畫布在螢幕上實際畫多大，避免不同瀏覽器/裝置解析度餵進模型的圖不一致。
+const MODEL_SIZE = 256;
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const clearBtn = document.getElementById("clearBtn");
+const submitBtn = document.getElementById("submitBtn");
+const resultImg = document.getElementById("resultImg");
+const statusEl = document.getElementById("status");
+
+let drawing = false;
+let hasDrawn = false;
+
+function resetCanvas() {
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 10;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  hasDrawn = false;
+}
+resetCanvas();
+
+function pointFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (canvas.width / rect.width),
+    y: (e.clientY - rect.top) * (canvas.height / rect.height),
+  };
+}
+
+// Pointer Events：一套程式碼同時吃滑鼠、觸控、手寫筆，不用分開寫
+// mousedown/touchstart 兩份邏輯。
+canvas.addEventListener("pointerdown", (e) => {
+  canvas.setPointerCapture(e.pointerId);
+  drawing = true;
+  hasDrawn = true;
+  const p = pointFromEvent(e);
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+});
+
+canvas.addEventListener("pointermove", (e) => {
+  if (!drawing) return;
+  const p = pointFromEvent(e);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+});
+
+["pointerup", "pointercancel", "pointerleave"].forEach((evt) =>
+  canvas.addEventListener(evt, () => { drawing = false; })
+);
+
+clearBtn.addEventListener("click", () => {
+  resetCanvas();
+  resultImg.textContent = "尚無結果";
+  statusEl.textContent = "";
+});
+
+submitBtn.addEventListener("click", () => {
+  if (!hasDrawn) {
+    statusEl.textContent = "先在畫布上寫一筆，再送出";
+    return;
+  }
+
+  // 縮成模型輸入尺寸再送出，不是直接送螢幕解析度的原圖——這是跟 iOS 端
+  // 對齊的關鍵一步，見上面 MODEL_SIZE 的註解。
+  const offscreen = document.createElement("canvas");
+  offscreen.width = MODEL_SIZE;
+  offscreen.height = MODEL_SIZE;
+  const offCtx = offscreen.getContext("2d");
+  offCtx.fillStyle = "#fff";
+  offCtx.fillRect(0, 0, MODEL_SIZE, MODEL_SIZE);
+  offCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, MODEL_SIZE, MODEL_SIZE);
+
+  submitBtn.disabled = true;
+  statusEl.textContent = "辨識中…";
+
+  offscreen.toBlob(async (blob) => {
+    try {
+      const form = new FormData();
+      form.append("file", blob, "sample.png");
+
+      const res = await fetch(`${API_BASE}/predict/stroke?label=0`, {
+        method: "POST",
+        headers: { "X-API-Key": API_KEY },
+        body: form,
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
+
+      resultImg.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = `data:image/png;base64,${body.image_base64}`;
+      resultImg.appendChild(img);
+      statusEl.textContent =
+        `耗時 ${body.inference_ms.toFixed(0)} ms ‧ 位置 (${body.x_position.toFixed(0)}, ${body.y_position.toFixed(0)}) ‧ 尺寸 ${body.width}×${body.height}`;
+    } catch (err) {
+      statusEl.textContent = `失敗：${err.message}`;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }, "image/png");
+});
+</script>
+</body>
+</html>

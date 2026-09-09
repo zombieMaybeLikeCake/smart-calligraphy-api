@@ -19,6 +19,15 @@
 
 服務跑在我自己的 GPU 主機上，透過 [frp](https://github.com/fatedier/frp) 從無公網 IP 的內網環境對外提供（見下方「架構」）。這組 key 是展示用的，會不定期輪替；`/health`、`/docs` 完全不需要 key。
 
+**用滑鼠/觸控/手寫筆直接畫、不用打 curl**：`web/index.html` 是個單一自包含的網頁 demo（純 HTML/CSS/JS，沒有建置流程），對 `/predict/stroke` 現場畫一筆送出、右邊顯示生成結果。本機開一個靜態伺服器就能用：
+
+```bash
+cd web && python -m http.server 8765
+open http://localhost:8765
+```
+
+不能直接用 `file://` 開——瀏覽器的某些安全限制在 `file://` 底下行為不一致，用本機靜態伺服器最省事。（iOS 端的對應實作在 [smartCalligraphyPractice](../smartCalligraphyPractice) 那個獨立 repo，PencilKit 畫布、功能更完整；這個網頁版刻意做得很陽春——是可以現場點開的 demo，不是產品。）
+
 ## Demo
 
 ![Swagger UI](docs/swagger-ui.jpg)
