@@ -15,3 +15,4 @@ models/checkpoint/*.pth
 # frp 設定含 token，不進 git（若之後把 frp 相關檔案放進這個 repo）
 frpc.toml
 frp/frpc.toml
+smoke_test_output.png
