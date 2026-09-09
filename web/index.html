@@ -9,15 +9,27 @@
   h1 { font-size: 18px; margin: 0 0 16px; }
   .app { display: flex; gap: 24px; flex-wrap: wrap; }
   .panel { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
-  #canvas { border: 1px solid #999; border-radius: 4px; touch-action: none; cursor: crosshair; display: block; }
-  .buttons { margin-top: 12px; display: flex; gap: 8px; }
+  .canvasWrap { position: relative; width: 320px; height: 320px; border: 1px solid #999; border-radius: 4px; overflow: hidden; }
+  .canvasWrap canvas { position: absolute; left: 0; top: 0; width: 320px; height: 320px; }
+  #resultCanvas { background: #fff; }
+  #canvas { touch-action: none; cursor: crosshair; }
+  .buttons { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
   button { padding: 8px 16px; font-size: 14px; border: 1px solid #999; border-radius: 4px; background: #fff; cursor: pointer; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
-  #submitBtn { background: #222; color: #fff; border-color: #222; }
+  #synthBtn { background: #222; color: #fff; border-color: #222; }
+  .controls { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 13px; color: #333; }
+  .controls select { padding: 4px 6px; font-size: 13px; }
+  .disabled-group { padding-top: 10px; border-top: 1px dashed #eee; color: #999; }
+  .disabled-group select, .disabled-group input { cursor: not-allowed; }
+  #strokeStatus { margin-top: 8px; font-size: 12px; color: #666; min-height: 16px; }
+  .synth { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+  #synthText { flex: 1; padding: 8px; font-size: 14px; border: 1px solid #999; border-radius: 4px; }
   .result { width: 300px; }
-  #resultImg { width: 268px; height: 268px; border: 1px dashed #ccc; border-radius: 4px; background: #fafafa;
-               display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; }
-  #resultImg img { max-width: 100%; max-height: 100%; }
+  #resultImg { min-width: 268px; min-height: 268px; border: 1px dashed #ccc; border-radius: 4px; background: #fafafa;
+               display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px;
+               color: #999; font-size: 13px; padding: 6px; box-sizing: border-box; }
+  #resultImg img { max-width: 100%; max-height: 256px; }
+  #resultImg .char-result { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #666; }
   #status { margin-top: 12px; font-size: 13px; color: #666; white-space: pre-wrap; }
 </style>
 </head>
@@ -25,10 +37,37 @@
 <h1>Smart Calligraphy — 筆劃風格轉換 Demo</h1>
 <div class="app">
   <div class="panel">
-    <canvas id="canvas" width="320" height="320"></canvas>
+    <!-- 兩層 canvas 疊在一起：#canvas 是互動層，只顯示「目前正在畫的這一筆」草稿；
+         #resultCanvas 是累積層，畫完一筆送出後，AI 風格化結果貼在這層上、不會被清掉，
+         直到按「清除」。這跟 iOS ViewController.swift 的 canvasView 疊 CALayer 是同一個
+         設計，只是那邊用原生 layer、這邊用第二張 canvas。 -->
+    <div class="canvasWrap">
+      <canvas id="resultCanvas" width="256" height="256"></canvas>
+      <canvas id="canvas" width="256" height="256"></canvas>
+    </div>
     <div class="buttons">
       <button id="clearBtn">清除</button>
-      <button id="submitBtn">送出</button>
+      <span id="strokeStatus"></span>
+    </div>
+    <div class="controls">
+      <label>字體風格
+        <select id="styleSelect"></select>
+      </label>
+    </div>
+    <!-- 對齊 iOS setViewController.swift 的混合字體 UI，但後端 model/model.py
+         從來沒有真的實作過 blender()，選了不會有任何效果——先把 UI 搬過來、
+         disabled 掉並標註清楚，等後端補上再打開，不是漏接。 -->
+    <div class="controls disabled-group">
+      <label>混合字體（尚未支援）
+        <select id="blenderSelect" disabled></select>
+      </label>
+      <label>混合比率
+        <input id="blenderRatio" type="range" min="0" max="1" step="0.05" value="0" disabled />
+      </label>
+    </div>
+    <div class="synth">
+      <input id="synthText" type="text" maxlength="20" placeholder="打字生成，例如：永和" />
+      <button id="synthBtn">生成</button>
     </div>
   </div>
   <div class="panel result">
@@ -45,30 +84,63 @@
 // 完整網址。
 const API_BASE = "";
 const API_KEY = "jupd7_Nu3LEj3qJQhJNMt0TzkRHVU10ka4jDss862Js";
-// 跟後端 app/inference.py 的 CANVAS_SIZE 對齊——送出前一律縮成這個尺寸，
-// 不管畫布在螢幕上實際畫多大，避免不同瀏覽器/裝置解析度餵進模型的圖不一致。
+// 跟後端 app/inference.py 的 CANVAS_SIZE 對齊。這次兩層 canvas 的內部解析度
+// （width/height 屬性）直接設成這個值，不再另外用一個 offscreen canvas做縮放
+// ——因為現在是逐筆送出，每一筆送出的當下就是這個尺寸，不需要「畫布顯示大小
+// 跟送出尺寸不同」這層額外轉換。
 const MODEL_SIZE = 256;
 
+// 跟 iOS 版 setViewController.swift 裡的 style/blender 陣列逐字對齊——
+// index 就是後端 /predict、/synthesize 吃的 label 參數，兩邊選出來的
+// 風格名稱要對得上同一個 checkpoint 訓練時的 class 順序。
+const STYLES = ["原創","原創二值化","衡山毛筆","雁宇落雁","青松手寫","Dengxian","大陸宋體","fzshuti","漢儀新帝永樂大典","微軟正黑體","教育部隸書","王漢中行書","新帝竹林體","仿宋體","中易黑體","漢儀新蒂唐朝體","华文仿宋","STSong","隨峰體","宋體","小賴字體","標楷體"];
+const BLENDERS = ["無", ...STYLES];
+
+const resultCanvas = document.getElementById("resultCanvas");
+const resultCtx = resultCanvas.getContext("2d");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const clearBtn = document.getElementById("clearBtn");
-const submitBtn = document.getElementById("submitBtn");
+const strokeStatus = document.getElementById("strokeStatus");
+const styleSelect = document.getElementById("styleSelect");
+const blenderSelect = document.getElementById("blenderSelect");
+const synthText = document.getElementById("synthText");
+const synthBtn = document.getElementById("synthBtn");
 const resultImg = document.getElementById("resultImg");
 const statusEl = document.getElementById("status");
 
-let drawing = false;
-let hasDrawn = false;
+function fillSelect(select, names) {
+  names.forEach((name, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+}
+fillSelect(styleSelect, STYLES);
+fillSelect(blenderSelect, BLENDERS);
 
-function resetCanvas() {
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 10;
+// 打字生成（/synthesize/word）跟畫布逐筆送出（/predict/stroke）共用這個
+// 下拉選單——同一次練習通常只會用同一種風格，不用分開選兩次。
+
+function resetResultCanvas() {
+  resultCtx.fillStyle = "#fff";
+  resultCtx.fillRect(0, 0, resultCanvas.width, resultCanvas.height);
+}
+resetResultCanvas();
+
+function resetDrawLayer() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "rgba(30,30,30,0.5)"; // 只是畫的當下給個草稿回饋，送出後會被 AI 結果取代
+  ctx.lineWidth = 8;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  hasDrawn = false;
 }
-resetCanvas();
+resetDrawLayer();
+
+let drawing = false;
+let hasStroke = false;
+let strokeCount = 0;
 
 function pointFromEvent(e) {
   const rect = canvas.getBoundingClientRect();
@@ -83,7 +155,7 @@ function pointFromEvent(e) {
 canvas.addEventListener("pointerdown", (e) => {
   canvas.setPointerCapture(e.pointerId);
   drawing = true;
-  hasDrawn = true;
+  hasStroke = true;
   const p = pointFromEvent(e);
   ctx.beginPath();
   ctx.moveTo(p.x, p.y);
@@ -96,41 +168,42 @@ canvas.addEventListener("pointermove", (e) => {
   ctx.stroke();
 });
 
+// 逐筆即時送出：跟 iOS ViewController.swift 的 touchesEnded()→
+// saveLastStrokeAsImage() 對齊——畫完一筆（手指/筆離開畫布）立刻送出這一筆，
+// 不用另外按「送出」按鈕，也不是等整個字畫完才送。
 ["pointerup", "pointercancel", "pointerleave"].forEach((evt) =>
-  canvas.addEventListener(evt, () => { drawing = false; })
+  canvas.addEventListener(evt, () => {
+    if (!drawing) return;
+    drawing = false;
+    if (hasStroke) {
+      submitStroke();
+      hasStroke = false;
+    }
+  })
 );
 
-clearBtn.addEventListener("click", () => {
-  resetCanvas();
-  resultImg.textContent = "尚無結果";
-  statusEl.textContent = "";
-});
-
-submitBtn.addEventListener("click", () => {
-  if (!hasDrawn) {
-    statusEl.textContent = "先在畫布上寫一筆，再送出";
-    return;
-  }
-
-  // 縮成模型輸入尺寸再送出，不是直接送螢幕解析度的原圖——這是跟 iOS 端
-  // 對齊的關鍵一步，見上面 MODEL_SIZE 的註解。
+function submitStroke() {
+  // 只送「這一筆」的草稿（白底＋剛畫的墨跡），不是整個累積畫布——這是跟
+  // iOS 版對齊的關鍵：那邊每一筆都是獨立渲染成一張新圖再送出。
   const offscreen = document.createElement("canvas");
   offscreen.width = MODEL_SIZE;
   offscreen.height = MODEL_SIZE;
   const offCtx = offscreen.getContext("2d");
   offCtx.fillStyle = "#fff";
   offCtx.fillRect(0, 0, MODEL_SIZE, MODEL_SIZE);
-  offCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, MODEL_SIZE, MODEL_SIZE);
+  offCtx.drawImage(canvas, 0, 0);
 
-  submitBtn.disabled = true;
-  statusEl.textContent = "辨識中…";
+  // 立刻清掉草稿墨跡，讓使用者可以馬上畫下一筆；AI 結果回來後貼到
+  // resultCanvas，不用等這次請求做完。
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  strokeStatus.textContent = "辨識中…";
 
   offscreen.toBlob(async (blob) => {
     try {
       const form = new FormData();
-      form.append("file", blob, "sample.png");
-
-      const res = await fetch(`${API_BASE}/predict/stroke?label=0`, {
+      form.append("file", blob, "stroke.png");
+      const label = styleSelect.value;
+      const res = await fetch(`${API_BASE}/predict/stroke?label=${label}`, {
         method: "POST",
         headers: { "X-API-Key": API_KEY },
         body: form,
@@ -138,18 +211,89 @@ submitBtn.addEventListener("click", () => {
       const body = await res.json();
       if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
 
-      resultImg.innerHTML = "";
-      const img = document.createElement("img");
+      // x_position/y_position 是後端算出來的筆劃中心點，跟送出去的圖是同一個
+      // 座標系（256×256）——resultCanvas 也是 256×256，直接貼上去不用再縮放。
+      const img = new Image();
+      img.onload = () => {
+        resultCtx.drawImage(
+          img,
+          body.x_position - body.width / 2,
+          body.y_position - body.height / 2,
+          body.width,
+          body.height
+        );
+      };
       img.src = `data:image/png;base64,${body.image_base64}`;
-      resultImg.appendChild(img);
-      statusEl.textContent =
-        `耗時 ${body.inference_ms.toFixed(0)} ms ‧ 位置 (${body.x_position.toFixed(0)}, ${body.y_position.toFixed(0)}) ‧ 尺寸 ${body.width}×${body.height}`;
+
+      strokeCount += 1;
+      strokeStatus.textContent = `第 ${strokeCount} 筆 ‧ ${body.inference_ms.toFixed(0)} ms`;
     } catch (err) {
-      statusEl.textContent = `失敗：${err.message}`;
-    } finally {
-      submitBtn.disabled = false;
+      strokeStatus.textContent = `這一筆失敗：${err.message}`;
     }
   }, "image/png");
+}
+
+clearBtn.addEventListener("click", () => {
+  resetResultCanvas();
+  resetDrawLayer();
+  strokeCount = 0;
+  strokeStatus.textContent = "";
+  resultImg.textContent = "尚無結果";
+  statusEl.textContent = "";
+});
+
+// 打字生成跟畫布送出共用這個——一次可能回好幾個字，統一用陣列處理。
+function renderResults(items) {
+  resultImg.innerHTML = "";
+  items.forEach((item) => {
+    const wrap = document.createElement("div");
+    wrap.className = "char-result";
+    const img = document.createElement("img");
+    img.src = `data:image/png;base64,${item.image_base64}`;
+    wrap.appendChild(img);
+    if (item.char) {
+      const label = document.createElement("span");
+      label.textContent = item.char;
+      wrap.appendChild(label);
+    }
+    resultImg.appendChild(wrap);
+  });
+  const totalMs = items.reduce((sum, it) => sum + it.inference_ms, 0);
+  statusEl.textContent =
+    items.length > 1
+      ? `共 ${items.length} 字 ‧ 總耗時 ${totalMs.toFixed(0)} ms`
+      : `耗時 ${totalMs.toFixed(0)} ms ‧ 位置 (${items[0].x_position.toFixed(0)}, ${items[0].y_position.toFixed(0)}) ‧ 尺寸 ${items[0].width}×${items[0].height}`;
+}
+
+synthBtn.addEventListener("click", async () => {
+  const text = synthText.value.trim();
+  if (!text) {
+    statusEl.textContent = "請輸入文字";
+    return;
+  }
+
+  synthBtn.disabled = true;
+  statusEl.textContent = "生成中…";
+
+  try {
+    const label = styleSelect.value;
+    const res = await fetch(
+      `${API_BASE}/synthesize/word?text=${encodeURIComponent(text)}&label=${label}`,
+      { method: "POST", headers: { "X-API-Key": API_KEY } }
+    );
+    const body = await res.json();
+    if (!res.ok) {
+      // FastAPI 的字數上限驗證（422）detail 是陣列不是字串，跟 /predict/*
+      // 的 HTTPException（detail 是字串）格式不一樣，這裡兩種都接得住。
+      const msg = Array.isArray(body.detail) ? body.detail[0]?.msg : body.detail;
+      throw new Error(msg || `HTTP ${res.status}`);
+    }
+    renderResults(body);
+  } catch (err) {
+    statusEl.textContent = `失敗：${err.message}`;
+  } finally {
+    synthBtn.disabled = false;
+  }
 });
 </script>
 </body>
