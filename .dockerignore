@@ -11,5 +11,7 @@ data/
 *.ipynb
 .pytest_cache/
 README.md
+docs/
+tests/
 scripts/smoke_test_output*.png
 scripts/smoke_stroke_*.png

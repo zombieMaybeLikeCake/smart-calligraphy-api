@@ -1,0 +1,6 @@
+-r requirements.txt
+
+# 只有跑測試/量延遲時才需要，不進正式 image（Dockerfile 只裝 requirements.txt）
+pytest==8.3.3
+httpx==0.27.2
+requests==2.32.3
