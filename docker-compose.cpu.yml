@@ -1,0 +1,15 @@
+# 沒有 GPU 的機器（開發筆電、CI）用這個 overlay：
+#   docker compose -f docker-compose.yml -f docker-compose.cpu.yml up
+#
+# 主 docker-compose.yml 裡的 deploy.resources.reservations.devices 一旦寫死要 GPU，
+# 在完全沒有 GPU 的機器上會直接因為要不到裝置而啟動失敗，不會自動降級——
+# 所以 CPU 路徑不是靠自動判斷，是靠疊這個 overlay 明確關掉 GPU 保留、
+# 把 DEVICE 換成 cpu。app/inference.py 本身不用改，同一份程式碼、同一個 image。
+services:
+  api:
+    environment:
+      DEVICE: cpu
+    deploy:
+      resources:
+        reservations:
+          devices: !reset []

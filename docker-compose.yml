@@ -1,0 +1,18 @@
+services:
+  api:
+    build: .
+    image: smart-calligraphy-api:1.0.0
+    ports:
+      # 只綁 loopback：frpc（NSSM 服務，跑在同一台主機上）連得到 127.0.0.1:8000，
+      # 跟目前已經驗證過能透過 frp 對外存取的那組設定一致；同一個區網的其他機器連不到。
+      - "127.0.0.1:8000:8000"
+    environment:
+      DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

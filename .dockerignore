@@ -1,0 +1,14 @@
+.git
+.gitignore
+.dockerignore
+__pycache__/
+*.pyc
+.venv/
+venv/
+notebooks/
+data/
+*.ipynb
+.pytest_cache/
+README.md
+scripts/smoke_test_output*.png
+scripts/smoke_stroke_*.png
