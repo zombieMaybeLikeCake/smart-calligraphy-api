@@ -19,8 +19,8 @@
   #synthBtn { background: #222; color: #fff; border-color: #222; }
   .controls { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 13px; color: #333; }
   .controls select { padding: 4px 6px; font-size: 13px; }
-  .disabled-group { padding-top: 10px; border-top: 1px dashed #eee; color: #999; }
-  .disabled-group select, .disabled-group input { cursor: not-allowed; }
+  .blend-group { padding-top: 10px; border-top: 1px dashed #eee; }
+  .blend-group #blendRatioValue { color: #666; }
   #strokeStatus { margin-top: 8px; font-size: 12px; color: #666; min-height: 16px; }
   .synth { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; display: flex; gap: 8px; }
   #synthText { flex: 1; padding: 8px; font-size: 14px; border: 1px solid #999; border-radius: 4px; }
@@ -54,15 +54,17 @@
         <select id="styleSelect"></select>
       </label>
     </div>
-    <!-- 對齊 iOS setViewController.swift 的混合字體 UI，但後端 model/model.py
-         從來沒有真的實作過 blender()，選了不會有任何效果——先把 UI 搬過來、
-         disabled 掉並標註清楚，等後端補上再打開，不是漏接。 -->
-    <div class="controls disabled-group">
-      <label>混合字體（尚未支援）
-        <select id="blenderSelect" disabled></select>
+    <!-- 對齊 iOS setViewController.swift 的混合字體 UI。「無」＝不混合，
+         選了實際風格才會帶 label2／blend_ratio 給後端——見 app/inference.py
+         的 predict_blend()，重建自舊版 strokeStytleChangeServer.py 呼叫的
+         model.blender()（兩個風格的 embedding 依比率線性內插）。 -->
+    <div class="controls blend-group">
+      <label>混合字體
+        <select id="blenderSelect"></select>
       </label>
       <label>混合比率
-        <input id="blenderRatio" type="range" min="0" max="1" step="0.05" value="0" disabled />
+        <input id="blenderRatio" type="range" min="0" max="1" step="0.05" value="0" />
+        <span id="blendRatioValue">0.00</span>
       </label>
     </div>
     <div class="synth">
@@ -104,6 +106,8 @@ const clearBtn = document.getElementById("clearBtn");
 const strokeStatus = document.getElementById("strokeStatus");
 const styleSelect = document.getElementById("styleSelect");
 const blenderSelect = document.getElementById("blenderSelect");
+const blenderRatio = document.getElementById("blenderRatio");
+const blendRatioValue = document.getElementById("blendRatioValue");
 const synthText = document.getElementById("synthText");
 const synthBtn = document.getElementById("synthBtn");
 const resultImg = document.getElementById("resultImg");
@@ -120,8 +124,26 @@ function fillSelect(select, names) {
 fillSelect(styleSelect, STYLES);
 fillSelect(blenderSelect, BLENDERS);
 
-// 打字生成（/synthesize/word）跟畫布逐筆送出（/predict/stroke）共用這個
+blenderRatio.addEventListener("input", () => {
+  blendRatioValue.textContent = Number(blenderRatio.value).toFixed(2);
+});
+
+// 打字生成（/synthesize/word）跟畫布逐筆送出（/predict/stroke）共用這兩個
 // 下拉選單——同一次練習通常只會用同一種風格，不用分開選兩次。
+//
+// BLENDERS 陣列第 0 項是「無」＝不混合；選了實際風格（index 1 起）才組出
+// label2／blend_ratio 這兩個查詢參數。回傳空物件時 fetch 呼叫端不會加這兩個
+// key，後端 main.py 的 label2 預設值是 None，行為等同完全沒有混合字體。
+function blendParams() {
+  const idx = Number(blenderSelect.value);
+  if (idx === 0) return {};
+  return { label2: idx - 1, blend_ratio: blenderRatio.value };
+}
+
+function withParams(base, params) {
+  const usp = new URLSearchParams(params);
+  return usp.toString() ? `${base}&${usp.toString()}` : base;
+}
 
 function resetResultCanvas() {
   resultCtx.fillStyle = "#fff";
@@ -203,7 +225,8 @@ function submitStroke() {
       const form = new FormData();
       form.append("file", blob, "stroke.png");
       const label = styleSelect.value;
-      const res = await fetch(`${API_BASE}/predict/stroke?label=${label}`, {
+      const url = withParams(`${API_BASE}/predict/stroke?label=${label}`, blendParams());
+      const res = await fetch(url, {
         method: "POST",
         headers: { "X-API-Key": API_KEY },
         body: form,
@@ -277,10 +300,11 @@ synthBtn.addEventListener("click", async () => {
 
   try {
     const label = styleSelect.value;
-    const res = await fetch(
+    const url = withParams(
       `${API_BASE}/synthesize/word?text=${encodeURIComponent(text)}&label=${label}`,
-      { method: "POST", headers: { "X-API-Key": API_KEY } }
+      blendParams()
     );
+    const res = await fetch(url, { method: "POST", headers: { "X-API-Key": API_KEY } });
     const body = await res.json();
     if (!res.ok) {
       // FastAPI 的字數上限驗證（422）detail 是陣列不是字串，跟 /predict/*

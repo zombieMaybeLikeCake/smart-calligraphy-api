@@ -55,3 +55,36 @@ def test_synthesize_rejects_too_many_chars(client):
     # 不是我們自己的 HTTPException(400,...)——這條測試就是在確認這個限制
     # 真的接在路由上，不是只寫在 _run_synthesize 裡形同虛設。
     assert r.status_code == 422
+
+
+def test_synthesize_word_blend_matches_pure_labels_at_extremes(client):
+    # predict_blend(ratio=0) 應該跟 predict(label=label) 完全一樣，
+    # ratio=1 應該跟 predict(label=label2) 完全一樣——這是重建
+    # model.blender() 那個線性內插邏輯本身有沒有寫對的直接證據，不是
+    # 只測「有沒有回 200」。
+    plain = client.post("/synthesize/word", params={"text": "永", "label": 0}).json()
+    blend_r0 = client.post(
+        "/synthesize/word", params={"text": "永", "label": 0, "label2": 5, "blend_ratio": 0.0}
+    ).json()
+    blend_r1 = client.post(
+        "/synthesize/word", params={"text": "永", "label": 5, "label2": 0, "blend_ratio": 1.0}
+    ).json()
+    assert blend_r0[0]["image_base64"] == plain[0]["image_base64"]
+    assert blend_r1[0]["image_base64"] == plain[0]["image_base64"]
+
+
+def test_predict_word_rejects_invalid_label2(client):
+    # 要真的測到 label2 的範圍校驗，file 本身要先過關（_decode_upload 比
+    # label 驗證先跑），所以這裡用一張合法的最小 PNG，不是隨便的文字檔。
+    import io
+
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("L", (32, 32), 255).save(buf, format="PNG")
+    r = client.post(
+        "/predict/word",
+        files={"file": ("a.png", buf.getvalue(), "image/png")},
+        params={"label2": 999},
+    )
+    assert r.status_code == 400

@@ -1,7 +1,7 @@
 import io
 import time
 from contextlib import asynccontextmanager
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -114,6 +114,11 @@ async def _decode_upload(file: UploadFile) -> Image.Image:
         raise HTTPException(400, "無法解析為圖片")
 
 
+def _validate_label(label: int) -> None:
+    if not 0 <= label < settings.embedding_num:
+        raise HTTPException(400, f"label 必須介於 0 ~ {settings.embedding_num - 1}")
+
+
 def _run_predict(
     task: str,
     image: Image.Image,
@@ -122,19 +127,29 @@ def _run_predict(
     green: int,
     blue: int,
     alph: int,
+    label2: Optional[int] = None,
+    blend_ratio: float = 0.0,
 ) -> StrokeResult:
     handle = _handles.get(task)
     if handle is None:
         raise HTTPException(503, f"{task} 模型尚未載入")
 
-    if not 0 <= label < settings.embedding_num:
-        raise HTTPException(400, f"label 必須介於 0 ~ {settings.embedding_num - 1}")
+    _validate_label(label)
 
     start = time.perf_counter()
     try:
-        result = inference.predict(
-            handle, image, label=label, stroke_color=(red, green, blue, alph)
-        )
+        if label2 is None:
+            result = inference.predict(
+                handle, image, label=label, stroke_color=(red, green, blue, alph)
+            )
+        else:
+            # label2 有帶才是混合字體模式——對應舊版 strokeStytleChangeServer.py
+            # 的 model.blender()，見 app/inference.py 的 predict_blend() 註解。
+            _validate_label(label2)
+            result = inference.predict_blend(
+                handle, image, label_a=label, label_b=label2, ratio=blend_ratio,
+                stroke_color=(red, green, blue, alph),
+            )
     except ValueError as exc:
         # fitbest() 在圖片裡偵測不到筆劃時丟這個——是使用者輸入問題，不是伺服器錯誤
         raise HTTPException(400, str(exc))
@@ -151,14 +166,17 @@ async def predict_word(
     request: Request,
     file: UploadFile = File(...),
     label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
+    label2: Optional[int] = Query(None, description="混合字體：第二個風格類別索引，不帶則不混合"),
+    blend_ratio: float = Query(0.0, ge=0.0, le=1.0, description="混合比率，0=純 label，1=純 label2"),
     red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
     green: int = Query(0, ge=0, le=255, description="筆劃上色的 G"),
     blue: int = Query(0, ge=0, le=255, description="筆劃上色的 B"),
     alph: int = Query(255, ge=0, le=255, description="筆劃上色的 Alpha"),
 ):
-    """整字風格轉換：上傳一張手寫字圖片，回傳生成結果。"""
+    """整字風格轉換：上傳一張手寫字圖片，回傳生成結果。帶 label2 就是混合
+    字體模式（見 app/inference.py 的 predict_blend()）。"""
     image = await _decode_upload(file)
-    return _run_predict("word", image, label, red, green, blue, alph)
+    return _run_predict("word", image, label, red, green, blue, alph, label2, blend_ratio)
 
 
 @app.post(
@@ -169,15 +187,18 @@ async def predict_stroke(
     request: Request,
     file: UploadFile = File(...),
     label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
+    label2: Optional[int] = Query(None, description="混合字體：第二個風格類別索引，不帶則不混合"),
+    blend_ratio: float = Query(0.0, ge=0.0, le=1.0, description="混合比率，0=純 label，1=純 label2"),
     red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
     green: int = Query(0, ge=0, le=255, description="筆劃上色的 G"),
     blue: int = Query(0, ge=0, le=255, description="筆劃上色的 B"),
     alph: int = Query(255, ge=0, le=255, description="筆劃上色的 Alpha"),
 ):
     """單一筆劃風格轉換。目前這組 checkpoint（epoch 3000）品質較弱，見
-    app/config.py 裡的說明，回應格式跟 /predict/word 完全一樣。"""
+    app/config.py 裡的說明，回應格式跟 /predict/word 完全一樣。帶 label2
+    就是混合字體模式。"""
     image = await _decode_upload(file)
-    return _run_predict("stroke", image, label, red, green, blue, alph)
+    return _run_predict("stroke", image, label, red, green, blue, alph, label2, blend_ratio)
 
 
 def _run_synthesize(
@@ -188,6 +209,8 @@ def _run_synthesize(
     green: int,
     blue: int,
     alph: int,
+    label2: Optional[int] = None,
+    blend_ratio: float = 0.0,
 ) -> List[SynthesizeCharResult]:
     if len(text) > MAX_SYNTHESIZE_CHARS:
         raise HTTPException(400, f"最多一次 {MAX_SYNTHESIZE_CHARS} 個字，收到 {len(text)} 個")
@@ -196,17 +219,24 @@ def _run_synthesize(
     if handle is None:
         raise HTTPException(503, f"{task} 模型尚未載入")
 
-    if not 0 <= label < settings.embedding_num:
-        raise HTTPException(400, f"label 必須介於 0 ~ {settings.embedding_num - 1}")
+    _validate_label(label)
+    if label2 is not None:
+        _validate_label(label2)
 
     results: List[SynthesizeCharResult] = []
     for ch in text:
         start = time.perf_counter()
         try:
             image = inference.render_char(ch, settings.font_path)
-            result = inference.predict(
-                handle, image, label=label, stroke_color=(red, green, blue, alph)
-            )
+            if label2 is None:
+                result = inference.predict(
+                    handle, image, label=label, stroke_color=(red, green, blue, alph)
+                )
+            else:
+                result = inference.predict_blend(
+                    handle, image, label_a=label, label_b=label2, ratio=blend_ratio,
+                    stroke_color=(red, green, blue, alph),
+                )
         except ValueError as exc:
             # fitbest() 在字型畫出來的圖裡偵測不到筆劃時丟這個
             # （理論上不會發生——字型渲染一定有墨色——但空白字元之類的
@@ -228,6 +258,8 @@ async def synthesize_word(
     request: Request,
     text: str = Query(..., min_length=1, max_length=MAX_SYNTHESIZE_CHARS, description="要生成的文字"),
     label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
+    label2: Optional[int] = Query(None, description="混合字體：第二個風格類別索引，不帶則不混合"),
+    blend_ratio: float = Query(0.0, ge=0.0, le=1.0, description="混合比率，0=純 label，1=純 label2"),
     red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
     green: int = Query(0, ge=0, le=255, description="筆劃上色的 G"),
     blue: int = Query(0, ge=0, le=255, description="筆劃上色的 B"),
@@ -235,8 +267,8 @@ async def synthesize_word(
 ):
     """打字生成整字風格轉換：不用上傳圖片，文字先用字型（見
     app/config.py 的 font_path）畫成圖，再送進模型。逐字推論，回傳陣列，
-    順序對應輸入文字。"""
-    return _run_synthesize("word", text, label, red, green, blue, alph)
+    順序對應輸入文字。帶 label2 就是混合字體模式。"""
+    return _run_synthesize("word", text, label, red, green, blue, alph, label2, blend_ratio)
 
 
 @app.post(
@@ -249,10 +281,13 @@ async def synthesize_stroke(
     request: Request,
     text: str = Query(..., min_length=1, max_length=MAX_SYNTHESIZE_CHARS, description="要生成的文字"),
     label: int = Query(0, description="風格類別索引，0 ~ embedding_num-1"),
+    label2: Optional[int] = Query(None, description="混合字體：第二個風格類別索引，不帶則不混合"),
+    blend_ratio: float = Query(0.0, ge=0.0, le=1.0, description="混合比率，0=純 label，1=純 label2"),
     red: int = Query(0, ge=0, le=255, description="筆劃上色的 R"),
     green: int = Query(0, ge=0, le=255, description="筆劃上色的 G"),
     blue: int = Query(0, ge=0, le=255, description="筆劃上色的 B"),
     alph: int = Query(255, ge=0, le=255, description="筆劃上色的 Alpha"),
 ):
-    """打字生成單一筆劃風格轉換，其餘同 /synthesize/word。"""
-    return _run_synthesize("stroke", text, label, red, green, blue, alph)
+    """打字生成單一筆劃風格轉換，其餘同 /synthesize/word。帶 label2 就是
+    混合字體模式。"""
+    return _run_synthesize("stroke", text, label, red, green, blue, alph, label2, blend_ratio)

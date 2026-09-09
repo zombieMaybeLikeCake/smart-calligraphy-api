@@ -167,6 +167,24 @@ def preprocess(image: Image.Image) -> Tuple[torch.Tensor, dict]:
     return tensor, meta
 
 
+def _finalize(fake_b: torch.Tensor, meta: dict, stroke_color: Tuple[int, int, int, int]) -> dict:
+    """predict()／predict_blend() 共用的收尾：tensor -> 上色去背的圖片 ->
+    可直接 JSON 序列化的 dict。兩者只有「怎麼算出 fake_b」不同，這段完全一樣。"""
+    # UNetGenerator 最後一層是 Tanh，輸出範圍是 [-1, 1]，
+    # 要先還原成 [0, 1] 才能轉成正常的圖片像素值。
+    fake_b = (fake_b * 0.5 + 0.5).clamp(0, 1)
+    generated = transforms.ToPILImage()(fake_b)
+    tinted = _tint_strokes(generated, stroke_color)
+
+    return {
+        "x_position": meta["min_y"] + meta["width"] / 2,
+        "y_position": meta["min_x"] + meta["height"] / 2,
+        "width": max(meta["width"], meta["height"]),
+        "height": max(meta["width"], meta["height"]),
+        "image_base64": _image_to_base64(tinted),
+    }
+
+
 def predict(
     handle: ModelHandle,
     image: Image.Image,
@@ -187,16 +205,42 @@ def predict(
         handle.model.forward()
         fake_b = handle.model.fake_B[0].detach().cpu()
 
-    # UNetGenerator 最後一層是 Tanh，輸出範圍是 [-1, 1]，
-    # 要先還原成 [0, 1] 才能轉成正常的圖片像素值。
-    fake_b = (fake_b * 0.5 + 0.5).clamp(0, 1)
-    generated = transforms.ToPILImage()(fake_b)
-    tinted = _tint_strokes(generated, stroke_color)
+    return _finalize(fake_b, meta, stroke_color)
 
-    return {
-        "x_position": meta["min_y"] + meta["width"] / 2,
-        "y_position": meta["min_x"] + meta["height"] / 2,
-        "width": max(meta["width"], meta["height"]),
-        "height": max(meta["width"], meta["height"]),
-        "image_base64": _image_to_base64(tinted),
-    }
+
+def predict_blend(
+    handle: ModelHandle,
+    image: Image.Image,
+    label_a: int,
+    label_b: int,
+    ratio: float,
+    stroke_color: Tuple[int, int, int, int] = (0, 0, 0, 255),
+) -> dict:
+    """重建舊版 strokeStytleChangeServer.py（沒有 V2 字尾那支）呼叫的
+    model.blender()：混合兩個風格 label 的 embedding，ratio=0 是純
+    label_a、ratio=1 是純 label_b，中間值線性內插。
+
+    那個 blender() 方法本體已經從目前這份 model/model.py 遺失（整個
+    zi2ziV2 資料夾搜過，找不到定義，只有舊 server 腳本還在呼叫它），
+    但底層能力還在：UNetGenerator.forward()（model/generators.py）本來
+    就設計成——傳進去的 style 不是 LongTensor 就直接當成算好的 embedding
+    向量用，不會再查表。也就是說「查兩個 embedding、按比率內插、直接餵
+    給 generator」這件事不需要改 model.py，也不需要 Zi2ziModel.forward()
+    （那個只認單一 label），這裡繞過它直接呼叫 netG。
+    """
+    tensor, meta = preprocess(image)
+    model = handle.model
+    device = model.gpu_ids[0] if model.gpu_ids else "cpu"
+    tensor = tensor.to(device)
+    net = model.netG
+
+    with torch.no_grad():
+        idx_a = torch.tensor([label_a], device=device)
+        idx_b = torch.tensor([label_b], device=device)
+        emb_a = net.embedder(idx_a)
+        emb_b = net.embedder(idx_b)
+        mixed = emb_a * (1 - ratio) + emb_b * ratio
+        fake_b_batch, _ = net(tensor, mixed)
+        fake_b = fake_b_batch[0].detach().cpu()
+
+    return _finalize(fake_b, meta, stroke_color)
