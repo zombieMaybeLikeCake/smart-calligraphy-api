@@ -29,7 +29,7 @@ cd web && python -m http.server 8765
 open http://localhost:8765
 ```
 
-不能直接用 `file://` 開——瀏覽器的某些安全限制在 `file://` 底下行為不一致，用本機靜態伺服器最省事。（iOS 端的對應實作在 [smartCalligraphyPractice](../smartCalligraphyPractice) 那個獨立 repo，PencilKit 畫布、功能更完整；這個網頁版刻意做得很陽春——是可以現場點開的 demo，不是產品。）
+不能直接用 `file://` 開——瀏覽器的某些安全限制在 `file://` 底下行為不一致，用本機靜態伺服器最省事。（iOS 端的對應實作在 [smartCalligraphyPractice](../smartCalligraphyPractice) 那個獨立 repo，PencilKit 畫布、功能更完整。
 
 ## Demo
 
@@ -140,7 +140,7 @@ Client → FastAPI (app/main.py)
 
 - **FastAPI 而不是 Flask**：內建 Pydantic 驗證、自動產生 OpenAPI/Swagger UI（也就是 `/docs`），`async def` 搭配 lifespan 管理模型生命週期不用額外套件。
 - **GPU 為主、CPU 為備援，不是兩套程式碼**：`app/inference.py` 的 `load_model()` 只靠一個 `gpu_ids` 參數切換，`model/model.py` 本身已經有 CPU/GPU 兩條分支，靠 `DEVICE` 環境變數 + `docker-compose.cpu.yml` overlay 切換，沒有另外維護一份 CPU-only 分支。
-- **word/stroke 是兩個獨立端點，不是同一個端點的參數**：兩個模型的用途、輸出品質、未來的疊代週期都不一樣，做成參數切換只會讓 API 文件跟錯誤處理變得曖昧。
+- **word/stroke 是兩個獨立端點，不是同一個端點的參數**：兩個模型的用途、輸出品質、未來的疊代週期都不一樣，做成參數切換只會讓 API 文件跟錯誤處理變得混亂。
 
 ## 開發
 
