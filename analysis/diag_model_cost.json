@@ -1,0 +1,115 @@
+{
+ "ms_per_gmac": 0.9920096027498015,
+ "rows": [
+  {
+   "net": "zi2zi UNetGenerator 256",
+   "params_M": 55.5,
+   "GMACs": 17.84,
+   "steps": 2,
+   "est_ms_p95": 35.4,
+   "vram_train_b8_GB": 1.75,
+   "vram_train_b16_GB": 2.01,
+   "note": "現況：forward() 跑 netG 兩次（model.py:100-101）"
+  },
+  {
+   "net": "zi2zi UNetGenerator 256",
+   "params_M": 55.5,
+   "GMACs": 17.84,
+   "steps": 1,
+   "est_ms_p95": 17.7,
+   "vram_train_b8_GB": 1.75,
+   "vram_train_b16_GB": 2.01,
+   "note": "低成本修正：推論只跑一次 netG（直接呼叫 netG 而非 model.forward）"
+  },
+  {
+   "net": "diffusion UNet 64px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 6.75,
+   "steps": 1,
+   "est_ms_p95": 6.7,
+   "vram_train_b8_GB": 1.08,
+   "vram_train_b16_GB": 1.38,
+   "note": "擴散/流匹配 64px，1 步"
+  },
+  {
+   "net": "diffusion UNet 64px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 6.75,
+   "steps": 4,
+   "est_ms_p95": 26.8,
+   "vram_train_b8_GB": 1.08,
+   "vram_train_b16_GB": 1.38,
+   "note": "擴散/流匹配 64px，4 步"
+  },
+  {
+   "net": "diffusion UNet 64px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 6.75,
+   "steps": 8,
+   "est_ms_p95": 53.6,
+   "vram_train_b8_GB": 1.08,
+   "vram_train_b16_GB": 1.38,
+   "note": "擴散/流匹配 64px，8 步"
+  },
+  {
+   "net": "diffusion UNet 64px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 6.75,
+   "steps": 20,
+   "est_ms_p95": 134.0,
+   "vram_train_b8_GB": 1.08,
+   "vram_train_b16_GB": 1.38,
+   "note": "擴散/流匹配 64px，20 步"
+  },
+  {
+   "net": "diffusion UNet 128px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 27.41,
+   "steps": 1,
+   "est_ms_p95": 27.2,
+   "vram_train_b8_GB": 2.03,
+   "vram_train_b16_GB": 3.27,
+   "note": "擴散/流匹配 128px，1 步"
+  },
+  {
+   "net": "diffusion UNet 128px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 27.41,
+   "steps": 4,
+   "est_ms_p95": 108.8,
+   "vram_train_b8_GB": 2.03,
+   "vram_train_b16_GB": 3.27,
+   "note": "擴散/流匹配 128px，4 步"
+  },
+  {
+   "net": "diffusion UNet 128px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 27.41,
+   "steps": 8,
+   "est_ms_p95": 217.5,
+   "vram_train_b8_GB": 2.03,
+   "vram_train_b16_GB": 3.27,
+   "note": "擴散/流匹配 128px，8 步"
+  },
+  {
+   "net": "diffusion UNet 128px base64 mults(1, 2, 4)",
+   "params_M": 11.7,
+   "GMACs": 27.41,
+   "steps": 20,
+   "est_ms_p95": 543.8,
+   "vram_train_b8_GB": 2.03,
+   "vram_train_b16_GB": 3.27,
+   "note": "擴散/流匹配 128px，20 步"
+  },
+  {
+   "net": "diffusion UNet 256px base64 mults(1, 2, 4, 4)",
+   "params_M": 20.7,
+   "GMACs": 114.47,
+   "steps": 4,
+   "est_ms_p95": 454.2,
+   "vram_train_b8_GB": 5.86,
+   "vram_train_b16_GB": 10.8,
+   "note": "擴散 256px（為了對齊現況解析度），4 步"
+  }
+ ]
+}

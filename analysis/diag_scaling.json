@@ -1,0 +1,1082 @@
+[
+ {
+  "stroke": "橫",
+  "cell_pt": 75,
+  "bbox": "66x6",
+  "scale_to_256": 3.88,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.595,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 75,
+  "bbox": "66x6",
+  "scale_to_256": 3.88,
+  "resample": "NEAREST",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.595,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 75,
+  "bbox": "66x6",
+  "scale_to_256": 3.88,
+  "resample": "LANCZOS",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.595,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 150,
+  "bbox": "126x6",
+  "scale_to_256": 2.03,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.597,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.49
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 150,
+  "bbox": "126x6",
+  "scale_to_256": 2.03,
+  "resample": "NEAREST",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.597,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 150,
+  "bbox": "126x6",
+  "scale_to_256": 2.03,
+  "resample": "LANCZOS",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.597,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 300,
+  "bbox": "246x6",
+  "scale_to_256": 1.04,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.01
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 300,
+  "bbox": "246x6",
+  "scale_to_256": 1.04,
+  "resample": "NEAREST",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫",
+  "cell_pt": 300,
+  "bbox": "246x6",
+  "scale_to_256": 1.04,
+  "resample": "LANCZOS",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 75,
+  "bbox": "6x66",
+  "scale_to_256": 3.88,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.595,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 75,
+  "bbox": "6x66",
+  "scale_to_256": 3.88,
+  "resample": "NEAREST",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.595,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 75,
+  "bbox": "6x66",
+  "scale_to_256": 3.88,
+  "resample": "LANCZOS",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.595,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 150,
+  "bbox": "6x126",
+  "scale_to_256": 2.03,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.597,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 150,
+  "bbox": "6x126",
+  "scale_to_256": 2.03,
+  "resample": "NEAREST",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.597,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 150,
+  "bbox": "6x126",
+  "scale_to_256": 2.03,
+  "resample": "LANCZOS",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.597,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 300,
+  "bbox": "6x246",
+  "scale_to_256": 1.04,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 300,
+  "bbox": "6x246",
+  "scale_to_256": 1.04,
+  "resample": "NEAREST",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎",
+  "cell_pt": 300,
+  "bbox": "6x246",
+  "scale_to_256": 1.04,
+  "resample": "LANCZOS",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 75,
+  "bbox": "11x14",
+  "scale_to_256": 18.29,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 69,
+  "roundtrip_iou": 0.73,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.45
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 75,
+  "bbox": "11x14",
+  "scale_to_256": 18.29,
+  "resample": "NEAREST",
+  "line_w_model_px": 73,
+  "roundtrip_iou": 0.73,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 75,
+  "bbox": "11x14",
+  "scale_to_256": 18.29,
+  "resample": "LANCZOS",
+  "line_w_model_px": 67,
+  "roundtrip_iou": 0.73,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.45
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 150,
+  "bbox": "16x21",
+  "scale_to_256": 12.19,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 45,
+  "roundtrip_iou": 0.791,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.42
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 150,
+  "bbox": "16x21",
+  "scale_to_256": 12.19,
+  "resample": "NEAREST",
+  "line_w_model_px": 49,
+  "roundtrip_iou": 0.791,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 150,
+  "bbox": "16x21",
+  "scale_to_256": 12.19,
+  "resample": "LANCZOS",
+  "line_w_model_px": 45,
+  "roundtrip_iou": 0.791,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.42
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 300,
+  "bbox": "27x36",
+  "scale_to_256": 7.11,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 27,
+  "roundtrip_iou": 0.838,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.4
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 300,
+  "bbox": "27x36",
+  "scale_to_256": 7.11,
+  "resample": "NEAREST",
+  "line_w_model_px": 29,
+  "roundtrip_iou": 0.838,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "點",
+  "cell_pt": 300,
+  "bbox": "27x36",
+  "scale_to_256": 7.11,
+  "resample": "LANCZOS",
+  "line_w_model_px": 27,
+  "roundtrip_iou": 0.838,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.4
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 75,
+  "bbox": "40x58",
+  "scale_to_256": 4.41,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.493,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.42
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 75,
+  "bbox": "40x58",
+  "scale_to_256": 4.41,
+  "resample": "NEAREST",
+  "line_w_model_px": 17,
+  "roundtrip_iou": 0.493,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 75,
+  "bbox": "40x58",
+  "scale_to_256": 4.41,
+  "resample": "LANCZOS",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.493,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.42
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 150,
+  "bbox": "74x111",
+  "scale_to_256": 2.31,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.759,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 150,
+  "bbox": "74x111",
+  "scale_to_256": 2.31,
+  "resample": "NEAREST",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.759,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 150,
+  "bbox": "74x111",
+  "scale_to_256": 2.31,
+  "resample": "LANCZOS",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.759,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.41
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 300,
+  "bbox": "141x216",
+  "scale_to_256": 1.19,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.484,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.25
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 300,
+  "bbox": "141x216",
+  "scale_to_256": 1.19,
+  "resample": "NEAREST",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.484,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "撇",
+  "cell_pt": 300,
+  "bbox": "141x216",
+  "scale_to_256": 1.19,
+  "resample": "LANCZOS",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.484,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.31
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 75,
+  "bbox": "55x51",
+  "scale_to_256": 4.65,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 17,
+  "roundtrip_iou": 0.602,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 75,
+  "bbox": "55x51",
+  "scale_to_256": 4.65,
+  "resample": "NEAREST",
+  "line_w_model_px": 19,
+  "roundtrip_iou": 0.602,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 75,
+  "bbox": "55x51",
+  "scale_to_256": 4.65,
+  "resample": "LANCZOS",
+  "line_w_model_px": 17,
+  "roundtrip_iou": 0.602,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 150,
+  "bbox": "104x96",
+  "scale_to_256": 2.46,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.601,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.38
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 150,
+  "bbox": "104x96",
+  "scale_to_256": 2.46,
+  "resample": "NEAREST",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.601,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 150,
+  "bbox": "104x96",
+  "scale_to_256": 2.46,
+  "resample": "LANCZOS",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.601,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 300,
+  "bbox": "201x186",
+  "scale_to_256": 1.27,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.6,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.38
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 300,
+  "bbox": "201x186",
+  "scale_to_256": 1.27,
+  "resample": "NEAREST",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.6,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫折",
+  "cell_pt": 300,
+  "bbox": "201x186",
+  "scale_to_256": 1.27,
+  "resample": "LANCZOS",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.6,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.38
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 75,
+  "bbox": "48x65",
+  "scale_to_256": 3.94,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.61,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 75,
+  "bbox": "48x65",
+  "scale_to_256": 3.94,
+  "resample": "NEAREST",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.61,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 75,
+  "bbox": "48x65",
+  "scale_to_256": 3.94,
+  "resample": "LANCZOS",
+  "line_w_model_px": 15,
+  "roundtrip_iou": 0.61,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 150,
+  "bbox": "90x123",
+  "scale_to_256": 2.08,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.797,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.49
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 150,
+  "bbox": "90x123",
+  "scale_to_256": 2.08,
+  "resample": "NEAREST",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.797,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 150,
+  "bbox": "90x123",
+  "scale_to_256": 2.08,
+  "resample": "LANCZOS",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.797,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   0.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 300,
+  "bbox": "174x240",
+  "scale_to_256": 1.07,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.605,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.42
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 300,
+  "bbox": "174x240",
+  "scale_to_256": 1.07,
+  "resample": "NEAREST",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.605,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "豎彎鉤",
+  "cell_pt": 300,
+  "bbox": "174x240",
+  "scale_to_256": 1.07,
+  "resample": "LANCZOS",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.605,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.43
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 75,
+  "bbox": "55x50",
+  "scale_to_256": 4.65,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 19,
+  "roundtrip_iou": 0.783,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   0.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 75,
+  "bbox": "55x50",
+  "scale_to_256": 4.65,
+  "resample": "NEAREST",
+  "line_w_model_px": 19,
+  "roundtrip_iou": 0.783,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   0.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 75,
+  "bbox": "55x50",
+  "scale_to_256": 4.65,
+  "resample": "LANCZOS",
+  "line_w_model_px": 19,
+  "roundtrip_iou": 0.783,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   0.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 150,
+  "bbox": "104x95",
+  "scale_to_256": 2.46,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.618,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 150,
+  "bbox": "104x95",
+  "scale_to_256": 2.46,
+  "resample": "NEAREST",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.618,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 150,
+  "bbox": "104x95",
+  "scale_to_256": 2.46,
+  "resample": "LANCZOS",
+  "line_w_model_px": 9,
+  "roundtrip_iou": 0.618,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.39
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 300,
+  "bbox": "201x185",
+  "scale_to_256": 1.27,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.618,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.37
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 300,
+  "bbox": "201x185",
+  "scale_to_256": 1.27,
+  "resample": "NEAREST",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.618,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "橫折鉤",
+  "cell_pt": 300,
+  "bbox": "201x185",
+  "scale_to_256": 1.27,
+  "resample": "LANCZOS",
+  "line_w_model_px": 5,
+  "roundtrip_iou": 0.618,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.38
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 75,
+  "bbox": "78x6",
+  "scale_to_256": 3.28,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 13,
+  "roundtrip_iou": 0.596,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 75,
+  "bbox": "78x6",
+  "scale_to_256": 3.28,
+  "resample": "NEAREST",
+  "line_w_model_px": 13,
+  "roundtrip_iou": 0.596,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 75,
+  "bbox": "78x6",
+  "scale_to_256": 3.28,
+  "resample": "LANCZOS",
+  "line_w_model_px": 13,
+  "roundtrip_iou": 0.596,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 150,
+  "bbox": "150x6",
+  "scale_to_256": 1.71,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.598,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 150,
+  "bbox": "150x6",
+  "scale_to_256": 1.71,
+  "resample": "NEAREST",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.598,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 150,
+  "bbox": "150x6",
+  "scale_to_256": 1.71,
+  "resample": "LANCZOS",
+  "line_w_model_px": 7,
+  "roundtrip_iou": 0.598,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.5
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 300,
+  "bbox": "294x6",
+  "scale_to_256": 0.87,
+  "resample": "BICUBIC(現況預設)",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.2
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 300,
+  "bbox": "294x6",
+  "scale_to_256": 0.87,
+  "resample": "NEAREST",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.598,
+  "aligned_iou": 0.999,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.0
+ },
+ {
+  "stroke": "長橫(整行)",
+  "cell_pt": 300,
+  "bbox": "294x6",
+  "scale_to_256": 0.87,
+  "resample": "LANCZOS",
+  "line_w_model_px": 3,
+  "roundtrip_iou": 0.599,
+  "aligned_iou": 1.0,
+  "center_err_px": [
+   1.0,
+   1.0
+  ],
+  "halo_ratio": 0.2
+ }
+]

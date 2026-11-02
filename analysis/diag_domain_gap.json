@@ -1,0 +1,38 @@
+{
+ "永": {
+  "pixels": 8498,
+  "max_width": 19,
+  "typical_width": 9
+ },
+ "和": {
+  "pixels": 10853,
+  "max_width": 21,
+  "typical_width": 9
+ },
+ "書": {
+  "pixels": 13347,
+  "max_width": 13,
+  "typical_width": 7
+ },
+ "法": {
+  "pixels": 8984,
+  "max_width": 15,
+  "typical_width": 7
+ },
+ "一": {
+  "pixels": 2673,
+  "max_width": 15,
+  "typical_width": 11
+ },
+ "乙": {
+  "pixels": 7860,
+  "max_width": 19,
+  "typical_width": 9
+ },
+ "了": {
+  "pixels": 4969,
+  "max_width": 19,
+  "typical_width": 9
+ },
+ "T": 9
+}
