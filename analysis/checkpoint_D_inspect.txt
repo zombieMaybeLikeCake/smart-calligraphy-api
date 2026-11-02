@@ -1,0 +1,56 @@
+== smartCalligraphyPractice/3000_net_D.pth  (17458091 bytes, 26 entries)
+  model.0.weight                                          (64, 2, 5, 5)          FloatStorage
+  model.0.bias                                            (64,)                  FloatStorage
+  model.2.weight                                          (128, 64, 5, 5)        FloatStorage
+  model.3.weight                                          (128,)                 FloatStorage
+  model.3.bias                                            (128,)                 FloatStorage
+  model.3.running_mean                                    (128,)                 FloatStorage
+  model.3.running_var                                     (128,)                 FloatStorage
+  model.3.num_batches_tracked                             ()                     LongStorage
+  model.5.weight                                          (256, 128, 5, 5)       FloatStorage
+  model.6.weight                                          (256,)                 FloatStorage
+  model.6.bias                                            (256,)                 FloatStorage
+  model.6.running_mean                                    (256,)                 FloatStorage
+  model.6.running_var                                     (256,)                 FloatStorage
+  model.6.num_batches_tracked                             ()                     LongStorage
+  model.8.weight                                          (512, 256, 5, 5)       FloatStorage
+  model.9.weight                                          (512,)                 FloatStorage
+  model.9.bias                                            (512,)                 FloatStorage
+  model.9.running_mean                                    (512,)                 FloatStorage
+  model.9.running_var                                     (512,)                 FloatStorage
+  model.9.num_batches_tracked                             ()                     LongStorage
+  model.11.weight                                         (1, 512, 5, 5)         FloatStorage
+  model.11.bias                                           (1,)                   FloatStorage
+  binary.weight                                           (1, 1024)              FloatStorage
+  binary.bias                                             (1,)                   FloatStorage
+  catagory.weight                                         (40, 1024)             FloatStorage
+  catagory.bias                                           (40,)                  FloatStorage
+  total params (incl. BN buffers): 4362477
+== smartCalligraphyPractice/6000_net_D.pth  (17458091 bytes, 26 entries)
+  model.0.weight                                          (64, 2, 5, 5)          FloatStorage
+  model.0.bias                                            (64,)                  FloatStorage
+  model.2.weight                                          (128, 64, 5, 5)        FloatStorage
+  model.3.weight                                          (128,)                 FloatStorage
+  model.3.bias                                            (128,)                 FloatStorage
+  model.3.running_mean                                    (128,)                 FloatStorage
+  model.3.running_var                                     (128,)                 FloatStorage
+  model.3.num_batches_tracked                             ()                     LongStorage
+  model.5.weight                                          (256, 128, 5, 5)       FloatStorage
+  model.6.weight                                          (256,)                 FloatStorage
+  model.6.bias                                            (256,)                 FloatStorage
+  model.6.running_mean                                    (256,)                 FloatStorage
+  model.6.running_var                                     (256,)                 FloatStorage
+  model.6.num_batches_tracked                             ()                     LongStorage
+  model.8.weight                                          (512, 256, 5, 5)       FloatStorage
+  model.9.weight                                          (512,)                 FloatStorage
+  model.9.bias                                            (512,)                 FloatStorage
+  model.9.running_mean                                    (512,)                 FloatStorage
+  model.9.running_var                                     (512,)                 FloatStorage
+  model.9.num_batches_tracked                             ()                     LongStorage
+  model.11.weight                                         (1, 512, 5, 5)         FloatStorage
+  model.11.bias                                           (1,)                   FloatStorage
+  binary.weight                                           (1, 1024)              FloatStorage
+  binary.bias                                             (1,)                   FloatStorage
+  catagory.weight                                         (40, 1024)             FloatStorage
+  catagory.bias                                           (40,)                  FloatStorage
+  total params (incl. BN buffers): 4362477

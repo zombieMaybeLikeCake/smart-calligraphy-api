@@ -1,0 +1,12 @@
+block                down conv (in->out, k4 s2 p1)      feature map after down     up convT                               params
+B0 outermost         1->64                              64x128x128                 128->1                                  3,073
+B1                   64->128                            128x64x64                  256->64                               393,600
+B2                   128->256                           256x32x32                  512->128                            1,573,632
+B3                   256->512                           512x16x16                  1024->256                           6,292,992
+B4 (ngf*8)           512->512                           512x8x8                    1024->512                          12,584,960
+B5 (ngf*8)           512->512                           512x4x4                    1024->512                          12,584,960
+B6 (ngf*8)           512->512                           512x2x2                    1024->512                          12,584,960
+B7 innermost         512->512                           512x1x1                    640->512                            9,438,208
+embedder             nn.Embedding(40,128) = 5,120
+G 可訓練參數總計（含 BN 的 weight/bias，不含 BN running stats）: 55,461,505  ≈ 221.8 MB (float32)
+bottleneck: 512x1x1 與 style(128) 在 channel 維度 concat -> 640 channel 再進 ConvTranspose2d
